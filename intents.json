@@ -1,0 +1,235 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "hi", "hello", "hey", "howdy", "hiya", "good morning", "good evening",
+        "good afternoon", "whats up", "sup", "yo", "greetings", "hi there",
+        "hello there", "hey there", "how are you", "how r u", "hows it going"
+      ],
+      "responses": [
+        "Hey there! 👋 I'm your AI assistant. What can I help you with today?",
+        "Hello! 😊 Great to see you! How can I assist you?",
+        "Hi! 🌟 I'm ready to help. What's on your mind?",
+        "Hey! 👋 Welcome! Feel free to ask me anything.",
+        "Hello there! 😄 I'm here and ready to chat. What do you need?"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "bye", "goodbye", "see you", "see ya", "later", "take care",
+        "farewell", "cya", "gotta go", "i'm leaving", "im leaving",
+        "have to go", "talk later", "ttyl", "peace out", "good night",
+        "good bye", "gtg", "catch you later"
+      ],
+      "responses": [
+        "Goodbye! 👋 It was great chatting with you. Come back anytime!",
+        "See you later! 🌟 Take care and have a wonderful day!",
+        "Farewell! 😊 Feel free to return whenever you need help.",
+        "Bye bye! 👋 Hope I was helpful. Have an awesome day!",
+        "Take care! 🚀 Remember, I'm always here when you need me."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "thank you", "thanks", "thx", "ty", "thank u", "many thanks",
+        "thanks a lot", "thanks so much", "appreciate it", "much appreciated",
+        "that helped", "very helpful", "you helped me", "great help"
+      ],
+      "responses": [
+        "You're welcome! 😊 Happy to help anytime!",
+        "Anytime! 🌟 That's what I'm here for!",
+        "No problem at all! 👍 Feel free to ask more questions!",
+        "Glad I could help! 😄 Don't hesitate to come back!",
+        "My pleasure! 🎉 Is there anything else you'd like to know?"
+      ]
+    },
+    {
+      "tag": "about_ai",
+      "patterns": [
+        "what is ai", "explain artificial intelligence", "tell me about ai",
+        "what is artificial intelligence", "how does ai work", "ai definition",
+        "what do you know about ai", "define ai", "ai meaning",
+        "what is machine learning", "explain machine learning", "what is ml",
+        "how does machine learning work", "ml definition"
+      ],
+      "responses": [
+        "🤖 Artificial Intelligence (AI) is the simulation of human intelligence by machines. It includes machine learning, natural language processing, computer vision, and more! AI systems learn from data to make decisions and predictions.",
+        "🧠 AI is a branch of computer science focused on building smart machines capable of performing tasks that typically require human intelligence — like understanding speech, recognizing images, and making decisions!",
+        "🌟 Machine Learning is a subset of AI where systems learn from data without being explicitly programmed. Instead of writing rules, we feed data and let the model discover patterns on its own!"
+      ]
+    },
+    {
+      "tag": "about_chatbot",
+      "patterns": [
+        "what are you", "who are you", "tell me about yourself", "what can you do",
+        "how do you work", "are you a robot", "are you a bot", "what is your name",
+        "whats your name", "introduce yourself", "your capabilities", "your features"
+      ],
+      "responses": [
+        "🤖 I'm an AI Smart Chatbot built with Python, NLTK, and scikit-learn! I use NLP techniques like TF-IDF vectorization and cosine similarity to understand your questions and find the best responses.",
+        "👋 I'm your intelligent assistant! I'm powered by Natural Language Processing and can help you with questions about AI, coding, motivation, general knowledge, and much more!",
+        "🌟 I'm an AI-powered chatbot that uses machine learning techniques to understand your messages. I can handle spelling mistakes, maintain conversation context, and provide helpful responses on various topics!"
+      ]
+    },
+    {
+      "tag": "coding",
+      "patterns": [
+        "how to code", "learn programming", "python tutorial", "coding tips",
+        "best programming language", "learn python", "how to program",
+        "coding for beginners", "programming basics", "start coding",
+        "what language should i learn", "best language to learn", "coding advice",
+        "how to become developer", "become a programmer"
+      ],
+      "responses": [
+        "💻 Start your coding journey with Python! It has clean syntax, huge community support, and is used in AI, web dev, data science & more. Resources: Python.org, freeCodeCamp, CS50 on edX!",
+        "🚀 Top tips for learning to code:\n1. Pick ONE language (Python is great for beginners)\n2. Practice daily — even 30 mins helps!\n3. Build real projects\n4. Read other people's code\n5. Join communities like GitHub & Stack Overflow!",
+        "🎯 Best languages to learn in 2024:\n• Python — AI/Data/Automation\n• JavaScript — Web dev\n• SQL — Databases\n• Java — Enterprise\n• Go — Systems programming\n\nPython is your best bet to start!"
+      ]
+    },
+    {
+      "tag": "python",
+      "patterns": [
+        "what is python", "tell me about python", "python language",
+        "python programming", "why use python", "python features",
+        "python vs other languages", "is python good", "python uses"
+      ],
+      "responses": [
+        "🐍 Python is a high-level, interpreted programming language known for its simplicity and readability. Created by Guido van Rossum in 1991, it's now the #1 most popular language worldwide!",
+        "🌟 Python is amazing for:\n• 🤖 AI & Machine Learning (TensorFlow, PyTorch)\n• 📊 Data Science (Pandas, NumPy)\n• 🌐 Web Development (Django, Flask, FastAPI)\n• 🔧 Automation & Scripting\n• 📱 App Development\n\nIt reads almost like English — perfect for beginners!",
+        "🐍 Python's key strengths:\n• Simple, clean syntax\n• Massive library ecosystem (PyPI has 400k+ packages!)\n• Cross-platform\n• Huge community\n• Used by Google, NASA, Netflix, and more!"
+      ]
+    },
+    {
+      "tag": "motivation",
+      "patterns": [
+        "motivate me", "i need motivation", "i feel demotivated", "inspire me",
+        "give me motivation", "i want to give up", "i am struggling",
+        "feeling sad", "i feel like giving up", "encourage me", "i need inspiration",
+        "im tired of trying", "hard to keep going", "feeling low", "depressed"
+      ],
+      "responses": [
+        "💪 Remember: Every expert was once a beginner! The fact that you're trying already puts you ahead of most people. Keep going — your breakthrough could be just around the corner! 🌟",
+        "🔥 'Success is not final, failure is not fatal: It is the courage to continue that counts.' — Winston Churchill\n\nYou've got this! Every small step forward counts. 🚀",
+        "⭐ Hard times are part of the journey. Think about how far you've already come! Obstacles are just detours in the right direction. Stay consistent, be patient, and believe in yourself! 💫",
+        "🌈 You're stronger than you think! Remember:\n• Every expert was a beginner\n• Every master was once a disaster\n• Every pro had their struggles\n\nKeep pushing forward — you've got this! 💪"
+      ]
+    },
+    {
+      "tag": "joke",
+      "patterns": [
+        "tell me a joke", "make me laugh", "joke please", "funny joke",
+        "say something funny", "cheer me up", "got any jokes", "humor me",
+        "tell a joke", "i want to laugh"
+      ],
+      "responses": [
+        "😂 Why do programmers prefer dark mode?\n\nBecause light attracts bugs! 🐛",
+        "🤣 Why did the Python programmer wear glasses?\n\nBecause he couldn't C! 😄",
+        "😄 A SQL query walks into a bar, walks up to two tables and asks...\n'Can I JOIN you?' 🍺",
+        "🤖 Why was the AI model so good at relationships?\n\nBecause it had great neural connections! 😂",
+        "💻 How many programmers does it take to change a light bulb?\n\nNone — that's a hardware problem! 😅"
+      ]
+    },
+    {
+      "tag": "weather",
+      "patterns": [
+        "what is the weather", "how is the weather", "weather today",
+        "tell me the weather", "is it going to rain", "weather forecast",
+        "current weather", "todays weather", "weather outside"
+      ],
+      "responses": [
+        "🌤️ I don't have access to real-time weather data, but you can check:\n• weather.com\n• Google (just search your city + weather)\n• Your phone's weather app\n\nStay prepared for anything! ☔",
+        "⛅ I wish I could check the weather for you, but I don't have internet access! Try asking Google Assistant, Siri, or visit weather.gov for accurate forecasts. 🌈"
+      ]
+    },
+    {
+      "tag": "time",
+      "patterns": [
+        "what time is it", "current time", "what is the time", "tell me the time",
+        "whats the time", "time right now", "what day is it", "todays date",
+        "current date", "what is the date today"
+      ],
+      "responses": [
+        "🕐 I don't have access to real-time clock data, but your device always knows! Check the clock on your phone or computer — it's always accurate! ⏰",
+        "📅 For the current time and date, just glance at your device's status bar! I'm a language model without real-time access, but your system clock is always right. ⌚"
+      ]
+    },
+    {
+      "tag": "help",
+      "patterns": [
+        "help", "i need help", "help me", "can you help", "assist me",
+        "what can you help with", "how can you help", "support",
+        "i have a question", "i need assistance", "need guidance"
+      ],
+      "responses": [
+        "🆘 I'm here to help! You can ask me about:\n• 🤖 Artificial Intelligence & ML\n• 💻 Coding & Programming\n• 🐍 Python language\n• 💪 Motivation & inspiration\n• 😄 Jokes & fun\n• 📚 General knowledge\n• And much more!\n\nWhat would you like to know?",
+        "✨ Of course! I'm your smart AI assistant. Ask me anything about tech, programming, AI, career advice, motivation, or just have a chat! What's on your mind? 🌟"
+      ]
+    },
+    {
+      "tag": "career",
+      "patterns": [
+        "career advice", "how to get a job", "tech career", "data science career",
+        "ai career", "software engineer", "how to become data scientist",
+        "career in programming", "job in tech", "software development career",
+        "resume tips", "interview tips", "get hired", "tech jobs"
+      ],
+      "responses": [
+        "🚀 Tech Career Roadmap:\n1. Pick a specialization (AI/ML, Web Dev, Data Science, etc.)\n2. Learn fundamentals deeply\n3. Build a strong GitHub portfolio\n4. Contribute to open source\n5. Network on LinkedIn\n6. Apply consistently\n\nConsistency beats perfection every time! 💼",
+        "💼 Top tips to land a tech job:\n• Build 3-5 solid projects showcasing your skills\n• Write clear, readable code on GitHub\n• Solve LeetCode problems for interviews\n• Create a clean LinkedIn profile\n• Apply to 5-10 jobs per week\n• Follow up on applications!\n\nYou've got this! 🌟"
+      ]
+    },
+    {
+      "tag": "nlp",
+      "patterns": [
+        "what is nlp", "natural language processing", "explain nlp",
+        "how does nlp work", "nlp definition", "text processing",
+        "what is text mining", "language processing", "computational linguistics"
+      ],
+      "responses": [
+        "🗣️ NLP (Natural Language Processing) is the branch of AI that helps computers understand, interpret, and generate human language. It's what powers chatbots like me, Google Translate, Siri, and sentiment analysis!",
+        "🧠 NLP techniques include:\n• Tokenization — splitting text into words\n• Lemmatization — reducing words to root form\n• TF-IDF — measuring word importance\n• Sentiment Analysis — detecting emotion\n• Named Entity Recognition — finding names/places\n\nFascinating field! 🌟"
+      ]
+    },
+    {
+      "tag": "deep_learning",
+      "patterns": [
+        "what is deep learning", "explain deep learning", "neural networks",
+        "what are neural networks", "how do neural networks work",
+        "deep learning vs machine learning", "convolutional neural network",
+        "cnn", "rnn", "lstm", "transformer"
+      ],
+      "responses": [
+        "🧠 Deep Learning is a subset of ML using multi-layered neural networks inspired by the human brain. It excels at image recognition, speech processing, and language understanding!\n\nKey architectures:\n• CNN — Computer Vision\n• RNN/LSTM — Sequential Data\n• Transformers — NLP (GPT, BERT)",
+        "⚡ Neural Networks work by:\n1. Receiving input data\n2. Passing it through layers of neurons\n3. Each neuron applies weights & activation functions\n4. Learning by adjusting weights via backpropagation\n5. Output: predictions, classifications, or generated content!"
+      ]
+    },
+    {
+      "tag": "data_science",
+      "patterns": [
+        "what is data science", "learn data science", "data science career",
+        "data analyst", "data engineer", "big data", "data visualization",
+        "pandas", "numpy", "matplotlib", "statistics for data science"
+      ],
+      "responses": [
+        "📊 Data Science combines statistics, programming, and domain knowledge to extract insights from data! A data scientist's toolkit:\n• Python/R for analysis\n• Pandas & NumPy for data manipulation\n• Matplotlib/Seaborn for visualization\n• Scikit-learn for ML\n• SQL for databases",
+        "🔬 The Data Science pipeline:\n1. 📥 Collect data\n2. 🧹 Clean & preprocess\n3. 🔍 Explore (EDA)\n4. 🤖 Model & train\n5. 📊 Evaluate results\n6. 🚀 Deploy & monitor\n\nEach step is crucial for success!"
+      ]
+    },
+    {
+      "tag": "fun_facts",
+      "patterns": [
+        "fun fact", "tell me a fact", "interesting fact", "did you know",
+        "random fact", "something interesting", "share a fact", "cool fact"
+      ],
+      "responses": [
+        "🌟 Fun Fact: The first computer bug was an actual bug! In 1947, Grace Hopper's team found a moth stuck in a relay of the Harvard Mark II computer. They taped it in their logbook with the note 'First actual case of bug being found.' 🐛",
+        "🤖 Fun Fact: The word 'robot' comes from the Czech word 'robota' meaning 'forced labor.' It was first used in Karel Čapek's 1920 play 'R.U.R.' (Rossum's Universal Robots)!",
+        "💻 Fun Fact: There are over 700 programming languages in existence! But you really only need to master 1-2 to build amazing things. Python + SQL covers about 80% of data jobs! 🐍",
+        "🧠 Fun Fact: Your brain generates about 70,000 thoughts per day and processes information at about 120 meters per second. The first AI to beat a world chess champion was IBM's Deep Blue in 1997! ♟️"
+      ]
+    }
+  ]
+}
