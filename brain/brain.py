@@ -1,5 +1,6 @@
 from .personality import PersonalityEngine
 from .conversation import ConversationManager
+from .memory_recall import MemoryRecall
 
 
 class JarvisBrain:
@@ -10,12 +11,28 @@ class JarvisBrain:
 
         self.conversation = ConversationManager()
 
+        self.memory = MemoryRecall()
+
     def create_messages(self, history, user_message):
 
-        prompt = self.personality.get_system_prompt()
+        system_prompt = self.personality.get_system_prompt()
+
+        memory_context = self.memory.get_context()
+
+        full_prompt = system_prompt
+
+        if memory_context:
+
+            full_prompt += "\n\n"
+
+            full_prompt += memory_context
 
         return self.conversation.build_messages(
-            prompt,
+
+            full_prompt,
+
             history,
+
             user_message
+
         )
