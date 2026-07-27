@@ -1,4 +1,5 @@
 from brain.brain import JarvisBrain
+from agents.browser_agent import BrowserAgent
 
 from core.tool_router import ToolRouter
 from core.intent_analyzer import IntentAnalyzer
@@ -21,6 +22,8 @@ class JarvisController:
 
         self.tools = ToolRouter()
 
+        self.browser = BrowserAgent()
+
         self.memory = MemoryEngine()
 
         self.planner = Planner()
@@ -29,38 +32,63 @@ class JarvisController:
 
     def process(self, history, user_message):
 
-        # Start performance timer
+        # --------------------------------
+        # Performance Monitor
+        # --------------------------------
+
         monitor = PerformanceMonitor()
 
-        # Detect intent
+        # --------------------------------
+        # Detect Intent
+        # --------------------------------
+
         intent_data = self.intent.detect(user_message)
         intent = intent_data["intent"]
 
-        # Create execution plan
+        # --------------------------------
+        # Planner
+        # --------------------------------
+
         self.planner.create_plan(
             intent,
             user_message
         )
 
-        # Execute tools directly
+        # --------------------------------
+        # Tool Execution
+        # --------------------------------
+
         if intent == "tool":
 
-            result = self.tools.execute(user_message)
+            command = user_message.lower()
+
+            # Browser Commands
+            if "youtube" in command or "google" in command:
+
+                result = self.browser.execute(command)
+
+                if result:
+                    yield result
+                    return
+
+            # Desktop Commands
+            result = self.tools.execute(command)
 
             if result:
                 yield result
                 return
 
-        # Select model
+        # --------------------------------
+        # AI Chat
+        # --------------------------------
+
         llm = self.router.get_model(intent)
 
-        # Build prompt
         messages = self.brain.create_messages(
             history=history,
             user_message=user_message
         )
 
-        # Stream response
         full_response = ""
 
         for token in llm.stream_chat(messages):
@@ -71,11 +99,17 @@ class JarvisController:
 
             yield token
 
-        # Final processing
+        # --------------------------------
+        # Finalize Response
+        # --------------------------------
+
         self.pipeline.finalize(full_response)
 
-        # Performance logging
+        # --------------------------------
+        # Performance Logging
+        # --------------------------------
+
         elapsed = monitor.stop()
 
         print(f"[Jarvis] Intent: {intent}")
-        print(f"[Jarvis] Time: {elapsed}s")
+        print(f"[Jarvis] Time: {elapsed:.2f}s")
