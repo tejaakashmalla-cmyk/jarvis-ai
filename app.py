@@ -1,5 +1,5 @@
 """
-JARVIS OS - app.py
+JARVIS AI - app.py
 ==================
 ChatGPT-style Streamlit chat UI wired to the existing project modules.
 Only app.py has been modified. Brain, LLMService, MemoryDetector,
@@ -11,7 +11,7 @@ import json
 import os
 import threading
 from datetime import datetime
-
+from core.controller import JarvisController
 import streamlit as st
 
 # ---------------------------------------------------------------------------
@@ -28,7 +28,7 @@ from voice.tts import JarvisTTS
 # CONSTANTS
 # =============================================================================
 USERS_FILE = "users.json"
-APP_TITLE = "JARVIS OS"
+APP_TITLE = "JARVIS AI"
 
 
 # =============================================================================
@@ -319,19 +319,17 @@ def render_message_history() -> None:
 def handle_new_user_message(prompt: str) -> None:
     """
     Handle a freshly submitted user prompt:
-      1. Build the Brain's message payload from existing history.
+      1. Build the history payload from existing session_state messages.
       2. Store + render the user message.
-      3. Stream the assistant's reply token-by-token (true streaming).
+      3. Stream the assistant's reply token-by-token via JarvisController
+         (the UI never touches JarvisBrain or LLMService directly).
       4. Persist the assistant message.
       5. Kick off memory saving + voice synthesis on background threads.
     """
-    # 1. Build history exactly as the existing Brain integration expects.
+    # 1. Build history exactly as before - the Controller owns Brain/LLM wiring.
     history = []
     for msg in st.session_state.messages:
         history.append({"role": msg["role"], "content": msg["content"]})
-
-    brain = JarvisBrain()
-    messages = brain.create_messages(history=history, user_message=prompt)
 
     # 2. Store and render the user's message immediately.
     st.session_state.messages.append(
@@ -340,7 +338,7 @@ def handle_new_user_message(prompt: str) -> None:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # 3. Stream the assistant's response token-by-token.
+    # 3. Stream the assistant's response token-by-token through the Controller.
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         response_placeholder.markdown(
@@ -352,9 +350,9 @@ def handle_new_user_message(prompt: str) -> None:
         first_token_received = False
 
         try:
-            llm = LLMService()
+            controller = JarvisController()
 
-            for token in llm.stream_chat(messages):
+            for token in controller.process(history, prompt):
                 if not token:
                     continue
 
@@ -388,6 +386,14 @@ def handle_new_user_message(prompt: str) -> None:
         args=(prompt,),
         daemon=True,
     ).start()
+
+    if full_response and not full_response.startswith("⚠️"):
+        tts = JarvisTTS()
+        threading.Thread(
+            target=tts.speak,
+            args=(full_response,),
+            daemon=True,
+        ).start()
 
     if full_response and not full_response.startswith("⚠️"):
         tts = JarvisTTS()
