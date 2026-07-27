@@ -1,5 +1,6 @@
 import subprocess
 import os
+import webbrowser
 
 
 class ToolRouter:
@@ -10,7 +11,35 @@ class ToolRouter:
 
         try:
 
-            if "calculator" in command or "calc" in command:
+            # -----------------
+            # Websites
+            # -----------------
+
+            if "youtube" in command:
+                webbrowser.open("https://www.youtube.com")
+                return "Opening YouTube."
+
+            elif "google" in command:
+                webbrowser.open("https://www.google.com")
+                return "Opening Google."
+
+            elif "gmail" in command:
+                webbrowser.open("https://mail.google.com")
+                return "Opening Gmail."
+
+            elif "github" in command:
+                webbrowser.open("https://github.com")
+                return "Opening GitHub."
+
+            elif "chatgpt" in command:
+                webbrowser.open("https://chat.openai.com")
+                return "Opening ChatGPT."
+
+            # -----------------
+            # Desktop Apps
+            # -----------------
+
+            elif "calculator" in command or "calc" in command:
                 subprocess.Popen("calc.exe")
                 return "Opening Calculator."
 
@@ -27,12 +56,14 @@ class ToolRouter:
                 return "Opening File Explorer."
 
             elif "chrome" in command:
+
                 chrome_paths = [
                     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
                     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
                 ]
 
                 for path in chrome_paths:
+
                     if os.path.exists(path):
                         subprocess.Popen(path)
                         return "Opening Chrome."
@@ -40,7 +71,6 @@ class ToolRouter:
                 return "Chrome is not installed."
 
             elif "vscode" in command or "visual studio code" in command:
-
                 subprocess.Popen("code")
                 return "Opening VS Code."
 
