@@ -2,26 +2,29 @@
 JARVIS AI - app.py
 ==================
 ChatGPT-style Streamlit chat UI wired to the existing project modules.
-Only app.py has been modified. Brain, LLMService, MemoryDetector,
-MemoryManager, and voice.tts are used exactly as they already exist -
-no new methods, no renamed imports, no architecture changes.
+Only app.py has been modified. JarvisController, JarvisBrain, LLMService,
+MemoryDetector, MemoryManager, JarvisTTS, and JarvisSTT are used exactly
+as they already exist - no new methods, no renamed imports, no
+architecture changes.
 """
 
 import json
 import os
 import threading
 from datetime import datetime
-from core.controller import JarvisController
+
 import streamlit as st
 
 # ---------------------------------------------------------------------------
 # Existing project modules - imports kept EXACTLY as-is
 # ---------------------------------------------------------------------------
+from core.controller import JarvisController
 from brain.brain import JarvisBrain
 from services.llm_service import LLMService
 from brain.memory_detector import MemoryDetector
 from memory.memory_manager import MemoryManager
 from voice.tts import JarvisTTS
+from voice.stt import JarvisSTT
 
 
 # =============================================================================
@@ -29,6 +32,24 @@ from voice.tts import JarvisTTS
 # =============================================================================
 USERS_FILE = "users.json"
 APP_TITLE = "JARVIS AI"
+
+
+# =============================================================================
+# SINGLETON ENGINES
+# JarvisTTS and JarvisSTT are expensive to initialize (Piper / Whisper model
+# loading), so each is created exactly once per app process via
+# st.cache_resource, never per-message or per-rerun.
+# =============================================================================
+@st.cache_resource
+def get_tts_engine() -> JarvisTTS:
+    """Return the single shared JarvisTTS instance."""
+    return JarvisTTS()
+
+
+@st.cache_resource
+def get_stt_engine() -> JarvisSTT:
+    """Return the single shared JarvisSTT instance."""
+    return JarvisSTT()
 
 
 # =============================================================================
@@ -70,6 +91,11 @@ def register_user(username: str, password: str) -> tuple:
 
 
 def authenticate_user(username: str, password: str) -> bool:
+    """
+    Verify username/password against users.json.
+    Supports both the legacy plain-string record format and the current
+    dict-based record format, exactly as the existing users.json contains.
+    """
     username = (username or "").strip()
 
     if not username or not password:
@@ -81,17 +107,15 @@ def authenticate_user(username: str, password: str) -> bool:
     if record is None:
         return False
 
-    # OLD FORMAT
+    # Legacy format: users.json entry was a bare password string.
     if isinstance(record, str):
         return record == password
 
-    # NEW FORMAT
+    # Current format: users.json entry is a dict with a "password" key.
     if isinstance(record, dict):
         return record.get("password") == password
 
     return False
-
-    return record.get("password") == password
 
 
 # =============================================================================
@@ -104,6 +128,8 @@ def init_session_state() -> None:
         "username": None,
         "messages": [],  # list of {"role": ..., "content": ..., "time": ...}
         "auth_error": "",
+        "chat_input_box": "",
+        "pending_input_value": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -191,8 +217,8 @@ def inject_custom_css() -> None:
             color: #00f5d4;
         }
 
-        /* ---------- Chat input ---------- */
-        .stChatInput textarea {
+        /* ---------- Text input (custom bottom bar) ---------- */
+        .stTextInput input {
             background-color: #0d1117 !important;
             color: #e6edf3 !important;
             border-radius: 12px !important;
@@ -303,7 +329,7 @@ def process_memory(user_input: str) -> None:
             memory = MemoryManager()
             memory.save_items(items)
     except Exception as exc:  # noqa: BLE001 - never let memory errors break the app
-        print(f"[JARVIS OS] Memory processing error: {exc}")
+        print(f"[JARVIS AI] Memory processing error: {exc}")
 
 
 # =============================================================================
@@ -325,6 +351,9 @@ def handle_new_user_message(prompt: str) -> None:
          (the UI never touches JarvisBrain or LLMService directly).
       4. Persist the assistant message.
       5. Kick off memory saving + voice synthesis on background threads.
+
+    NOTE: This function contains ONLY response-generation logic.
+    All input-bar / microphone / send-button UI lives in render_chat_page().
     """
     # 1. Build history exactly as before - the Controller owns Brain/LLM wiring.
     history = []
@@ -381,6 +410,7 @@ def handle_new_user_message(prompt: str) -> None:
     )
 
     # 5. Background work: memory extraction + voice, neither blocks the UI.
+    #    Both use the single shared engine instances - no duplicate objects.
     threading.Thread(
         target=process_memory,
         args=(prompt,),
@@ -388,15 +418,7 @@ def handle_new_user_message(prompt: str) -> None:
     ).start()
 
     if full_response and not full_response.startswith("⚠️"):
-        tts = JarvisTTS()
-        threading.Thread(
-            target=tts.speak,
-            args=(full_response,),
-            daemon=True,
-        ).start()
-
-    if full_response and not full_response.startswith("⚠️"):
-        tts = JarvisTTS()
+        tts = get_tts_engine()
         threading.Thread(
             target=tts.speak,
             args=(full_response,),
@@ -434,7 +456,65 @@ def render_sidebar() -> None:
                 st.rerun()
 
         st.markdown("---")
-        st.caption("Powered by Ollama · Gemma3:4b · Piper TTS")
+        st.caption("Powered by Ollama · Gemma3:4b · Piper TTS · Whisper STT")
+
+
+def render_input_bar() -> None:
+    """
+    Render the custom bottom input bar:
+
+        [ Type your message................. ] 🎤 ➤
+
+    - Text box holds the message and can always be edited before sending.
+    - Mic button fills the text box with recognized speech (never auto-sends).
+    - Send button triggers handle_new_user_message() with the current text.
+    """
+    # Apply any pending programmatic text update *before* the text_input
+    # widget is instantiated below. Streamlit forbids writing to a widget's
+    # session_state key after that widget has already been created in the
+    # same run, so all updates are staged here first.
+    if st.session_state.pending_input_value is not None:
+        st.session_state.chat_input_box = st.session_state.pending_input_value
+        st.session_state.pending_input_value = None
+
+    st.markdown("---")
+    input_col, mic_col, send_col = st.columns([10, 1, 1])
+
+    with input_col:
+        st.text_input(
+            "Message JARVIS",
+            key="chat_input_box",
+            placeholder="Type your message...",
+            label_visibility="collapsed",
+        )
+
+    with mic_col:
+        mic_clicked = st.button("🎤", use_container_width=True)
+
+    with send_col:
+        send_clicked = st.button("➤", use_container_width=True)
+
+    # ---------------- Microphone: fill the text box, never auto-send ----------------
+    if mic_clicked:
+        stt = get_stt_engine()
+        with st.spinner("🎤 Listening..."):
+            try:
+                recognized_text = stt.listen()
+            except Exception as exc:  # noqa: BLE001
+                recognized_text = ""
+                st.error(f"Voice input error: {exc}")
+
+        if recognized_text:
+            st.session_state.pending_input_value = recognized_text
+            st.rerun()
+
+    # ---------------- Send: use the current (possibly edited) text ----------------
+    if send_clicked:
+        prompt = st.session_state.chat_input_box.strip()
+        if prompt:
+            st.session_state.pending_input_value = ""
+            handle_new_user_message(prompt)
+            st.rerun()
 
 
 def render_chat_page() -> None:
@@ -452,9 +532,8 @@ def render_chat_page() -> None:
     # avoiding flicker and duplicate re-draws.
     render_message_history()
 
-    prompt = st.chat_input("Message JARVIS...")
-    if prompt:
-        handle_new_user_message(prompt)
+    # Custom bottom input bar (text box + mic + send).
+    render_input_bar()
 
 
 # =============================================================================
