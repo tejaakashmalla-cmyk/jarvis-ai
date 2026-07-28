@@ -2,7 +2,6 @@ from brain.brain import JarvisBrain
 from agents.browser_agent import BrowserAgent
 
 from core.tool_router import ToolRouter
-from core.intent_analyzer import IntentAnalyzer
 from core.model_router import ModelRouter
 from core.planner import Planner
 from core.response_pipeline import ResponsePipeline
@@ -16,13 +15,11 @@ class JarvisController:
 
         self.brain = JarvisBrain()
 
-        self.intent = IntentAnalyzer()
-
         self.router = ModelRouter()
 
-        self.tools = ToolRouter()
-
         self.browser = BrowserAgent()
+
+        self.tools = ToolRouter()
 
         self.memory = MemoryEngine()
 
@@ -32,57 +29,91 @@ class JarvisController:
 
     def process(self, history, user_message):
 
-        # --------------------------------
-        # Performance Monitor
-        # --------------------------------
+        # ---------------------------------
+        # Start Performance Monitor
+        # ---------------------------------
 
         monitor = PerformanceMonitor()
 
-        # --------------------------------
-        # Detect Intent
-        # --------------------------------
+        # ---------------------------------
+        # Ask Planner for Execution Plan
+        # ---------------------------------
 
-        intent_data = self.intent.detect(user_message)
-        intent = intent_data["intent"]
+        plan = self.planner.create_plan(user_message)
 
-        # --------------------------------
-        # Planner
-        # --------------------------------
+        steps = plan.get("steps", [])
 
-        self.planner.create_plan(
-            intent,
-            user_message
-        )
+        # ---------------------------------
+        # Execute Planned Steps
+        # ---------------------------------
 
-        # --------------------------------
-        # Tool Execution
-        # --------------------------------
+        if steps:
 
-        if intent == "tool":
+            for step in steps:
 
-            command = user_message.lower()
+                agent = step.get("agent", "").lower()
 
-            # Browser Commands
-            if "youtube" in command or "google" in command:
+                # ---------------- Browser ----------------
 
-                result = self.browser.execute(command)
+                if agent == "browser":
 
-                if result:
-                    yield result
+                    website = step.get("website", "").lower()
+
+                    action = step.get("action", "").lower()
+
+                    query = step.get("query", "")
+
+                    command = ""
+
+                    if website == "youtube":
+
+                        command = f"open youtube and play {query}"
+
+                    elif website == "google":
+
+                        command = f"search google {query}"
+
+                    elif website == "github":
+
+                        command = "open github"
+
+                    elif website == "chatgpt":
+
+                        command = "open chatgpt"
+
+                    result = self.browser.execute(command)
+
+                    if result:
+                        yield result
+
+                    elapsed = monitor.stop()
+
+                    print(f"[Planner] Browser Task ({elapsed:.2f}s)")
+
                     return
 
-            # Desktop Commands
-            result = self.tools.execute(command)
+                # ---------------- Desktop ----------------
 
-            if result:
-                yield result
-                return
+                elif agent == "desktop":
 
-        # --------------------------------
-        # AI Chat
-        # --------------------------------
+                    action = step.get("action", "")
 
-        llm = self.router.get_model(intent)
+                    result = self.tools.execute(action)
+
+                    if result:
+                        yield result
+
+                    elapsed = monitor.stop()
+
+                    print(f"[Planner] Desktop Task ({elapsed:.2f}s)")
+
+                    return
+
+        # ---------------------------------
+        # Normal AI Conversation
+        # ---------------------------------
+
+        llm = self.router.get_model("chat")
 
         messages = self.brain.create_messages(
             history=history,
@@ -99,17 +130,8 @@ class JarvisController:
 
             yield token
 
-        # --------------------------------
-        # Finalize Response
-        # --------------------------------
-
         self.pipeline.finalize(full_response)
-
-        # --------------------------------
-        # Performance Logging
-        # --------------------------------
 
         elapsed = monitor.stop()
 
-        print(f"[Jarvis] Intent: {intent}")
-        print(f"[Jarvis] Time: {elapsed:.2f}s")
+        print(f"[Planner] Chat Task ({elapsed:.2f}s)")

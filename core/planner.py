@@ -5,7 +5,6 @@ import ollama
 class Planner:
 
     def __init__(self):
-
         self.model = "gemma3:4b"
 
     def create_plan(self, user_message):
@@ -13,15 +12,15 @@ class Planner:
         prompt = f"""
 You are Jarvis Planner.
 
-Convert the user's request into JSON.
+You convert natural language into an execution plan.
 
-IMPORTANT:
 Return ONLY valid JSON.
-Do NOT use markdown.
-Do NOT use ```json.
-Do NOT explain anything.
 
-Schema:
+Never explain anything.
+Never use markdown.
+Never use ```json.
+
+The JSON schema is:
 
 {{
     "steps": [
@@ -34,13 +33,20 @@ Schema:
     ]
 }}
 
+Rules:
+
+1. Browser tasks → agent="browser"
+2. Desktop tasks → agent="desktop"
+3. Normal questions → agent="chat"
+4. If there are multiple tasks, create multiple steps.
+5. Words like "then", "after that", "next", "finally", "and then" indicate a NEW step.
+
 Examples:
 
 User:
 Open YouTube and play Telugu songs
 
 Output:
-
 {{
     "steps": [
         {{
@@ -56,7 +62,6 @@ User:
 Search Google for Python tutorials
 
 Output:
-
 {{
     "steps": [
         {{
@@ -72,7 +77,6 @@ User:
 Open calculator
 
 Output:
-
 {{
     "steps": [
         {{
@@ -83,7 +87,29 @@ Output:
 }}
 
 User:
+Open calculator then open Notepad then search Google for AI news
 
+Output:
+{{
+    "steps": [
+        {{
+            "agent": "desktop",
+            "action": "calculator"
+        }},
+        {{
+            "agent": "desktop",
+            "action": "notepad"
+        }},
+        {{
+            "agent": "browser",
+            "website": "google",
+            "action": "search",
+            "query": "AI news"
+        }}
+    ]
+}}
+
+User:
 {user_message}
 """
 
@@ -103,10 +129,7 @@ User:
         print(text)
         print("\n======================================\n")
 
-        # -----------------------------
         # Remove markdown code fences
-        # -----------------------------
-
         text = text.strip()
 
         if text.startswith("```json"):
@@ -121,11 +144,9 @@ User:
         text = text.strip()
 
         try:
-
             return json.loads(text)
 
         except Exception as e:
-
             print("Planner JSON Error:", e)
 
             return {
