@@ -1,21 +1,28 @@
 from services.llm_service import LLMService
 
+from config.models import (
+    CHAT_MODEL,
+    PLANNER_MODEL,
+    CODING_MODEL,
+)
+
 
 class ModelRouter:
 
     def __init__(self):
 
-        self.chat_model = LLMService()
+        self.chat = LLMService(CHAT_MODEL)
+
+        self.coding = LLMService(CODING_MODEL)
+
+        self.planner = LLMService(PLANNER_MODEL)
 
     def get_model(self, intent):
 
         if intent == "coding":
-            return self.chat_model
+            return self.coding
 
-        if intent == "memory":
-            return self.chat_model
+        if intent == "planner":
+            return self.planner
 
-        if intent == "tool":
-            return self.chat_model
-
-        return self.chat_model
+        return self.chat

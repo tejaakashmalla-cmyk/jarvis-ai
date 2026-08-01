@@ -1,7 +1,5 @@
 from brain.brain import JarvisBrain
-from agents.browser_agent import BrowserAgent
-
-from core.tool_router import ToolRouter
+from core.task_executor import TaskExecutor
 from core.model_router import ModelRouter
 from core.planner import Planner
 from core.response_pipeline import ResponsePipeline
@@ -17,13 +15,11 @@ class JarvisController:
 
         self.router = ModelRouter()
 
-        self.browser = BrowserAgent()
-
-        self.tools = ToolRouter()
-
         self.memory = MemoryEngine()
 
         self.planner = Planner()
+
+        self.executor = TaskExecutor()
 
         self.pipeline = ResponsePipeline()
 
@@ -41,76 +37,31 @@ class JarvisController:
 
         plan = self.planner.create_plan(user_message)
 
-        steps = plan.get("steps", [])
+        print("\n========== EXECUTION PLAN ==========\n")
+        print(plan)
+        print("\n====================================\n")
 
         # ---------------------------------
-        # Execute Planned Steps
+        # Execute Plan
         # ---------------------------------
 
-        if steps:
+        results = self.executor.execute(plan)
 
-            for step in steps:
+        if results:
 
-                agent = step.get("agent", "").lower()
+            for result in results:
 
-                # ---------------- Browser ----------------
+                if result:
+                    yield result
 
-                if agent == "browser":
+            elapsed = monitor.stop()
 
-                    website = step.get("website", "").lower()
+            print(f"[Executor] Finished in {elapsed:.2f}s")
 
-                    action = step.get("action", "").lower()
-
-                    query = step.get("query", "")
-
-                    command = ""
-
-                    if website == "youtube":
-
-                        command = f"open youtube and play {query}"
-
-                    elif website == "google":
-
-                        command = f"search google {query}"
-
-                    elif website == "github":
-
-                        command = "open github"
-
-                    elif website == "chatgpt":
-
-                        command = "open chatgpt"
-
-                    result = self.browser.execute(command)
-
-                    if result:
-                        yield result
-
-                    elapsed = monitor.stop()
-
-                    print(f"[Planner] Browser Task ({elapsed:.2f}s)")
-
-                    return
-
-                # ---------------- Desktop ----------------
-
-                elif agent == "desktop":
-
-                    action = step.get("action", "")
-
-                    result = self.tools.execute(action)
-
-                    if result:
-                        yield result
-
-                    elapsed = monitor.stop()
-
-                    print(f"[Planner] Desktop Task ({elapsed:.2f}s)")
-
-                    return
+            return
 
         # ---------------------------------
-        # Normal AI Conversation
+        # Fallback to Chat
         # ---------------------------------
 
         llm = self.router.get_model("chat")
@@ -134,4 +85,4 @@ class JarvisController:
 
         elapsed = monitor.stop()
 
-        print(f"[Planner] Chat Task ({elapsed:.2f}s)")
+        print(f"[Chat] Finished in {elapsed:.2f}s")

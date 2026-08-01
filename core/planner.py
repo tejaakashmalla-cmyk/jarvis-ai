@@ -1,136 +1,177 @@
 import json
 import ollama
 
+from config.models import PLANNER_MODEL
+
 
 class Planner:
 
     def __init__(self):
-        self.model = "gemma3:4b"
+
+        self.model = PLANNER_MODEL
+
+    # -------------------------------------------------
+    # Create Execution Plan
+    # -------------------------------------------------
 
     def create_plan(self, user_message):
 
-        prompt = f"""
+        system_prompt = """
 You are Jarvis Planner.
 
-You convert natural language into an execution plan.
+You NEVER answer the user.
+
+You ONLY return JSON.
 
 Return ONLY valid JSON.
 
-Never explain anything.
+Never explain.
+
+Never write code.
+
 Never use markdown.
-Never use ```json.
 
-The JSON schema is:
+The schema is:
 
-{{
-    "steps": [
-        {{
-            "agent": "browser|desktop|chat",
-            "website": "",
-            "action": "",
-            "query": ""
-        }}
+{
+    "steps":[
+        {
+            "skill":"",
+            "language":"",
+            "name":"",
+            "query":"",
+            "action":""
+        }
     ]
-}}
+}
 
-Rules:
+Available skills:
 
-1. Browser tasks → agent="browser"
-2. Desktop tasks → agent="desktop"
-3. Normal questions → agent="chat"
-4. If there are multiple tasks, create multiple steps.
-5. Words like "then", "after that", "next", "finally", "and then" indicate a NEW step.
+browser.youtube.play
+browser.google.search
+desktop.open
+coding.create_project
+chat.reply
 
-Examples:
+RULES
+
+1. Browser requests -> browser skills
+
+2. Desktop apps -> desktop.open
+
+3. Project creation -> coding.create_project
+
+4. General conversation -> chat.reply
+
+5. Always preserve the COMPLETE project description inside "query".
+
+Examples
 
 User:
-Open YouTube and play Telugu songs
+Create a Python project called ExpenseTracker that stores data in JSON and allows add/delete/list expenses.
 
 Output:
-{{
-    "steps": [
-        {{
-            "agent": "browser",
-            "website": "youtube",
-            "action": "play",
-            "query": "Telugu songs"
-        }}
+
+{
+    "steps":[
+        {
+            "skill":"coding.create_project",
+            "language":"python",
+            "name":"ExpenseTracker",
+            "query":"Create a Python project called ExpenseTracker that stores data in JSON and allows add/delete/list expenses."
+        }
     ]
-}}
+}
 
 User:
-Search Google for Python tutorials
+Create a React portfolio website
 
 Output:
-{{
-    "steps": [
-        {{
-            "agent": "browser",
-            "website": "google",
-            "action": "search",
-            "query": "Python tutorials"
-        }}
+
+{
+    "steps":[
+        {
+            "skill":"coding.create_project",
+            "language":"react",
+            "name":"Portfolio",
+            "query":"Create a React portfolio website"
+        }
     ]
-}}
+}
+
+User:
+Search Google for AI News
+
+Output:
+
+{
+    "steps":[
+        {
+            "skill":"browser.google.search",
+            "query":"AI News"
+        }
+    ]
+}
 
 User:
 Open calculator
 
 Output:
-{{
-    "steps": [
-        {{
-            "agent": "desktop",
-            "action": "calculator"
-        }}
+
+{
+    "steps":[
+        {
+            "skill":"desktop.open",
+            "action":"calculator"
+        }
     ]
-}}
+}
 
 User:
-Open calculator then open Notepad then search Google for AI news
+What is Artificial Intelligence?
 
 Output:
-{{
-    "steps": [
-        {{
-            "agent": "desktop",
-            "action": "calculator"
-        }},
-        {{
-            "agent": "desktop",
-            "action": "notepad"
-        }},
-        {{
-            "agent": "browser",
-            "website": "google",
-            "action": "search",
-            "query": "AI news"
-        }}
-    ]
-}}
 
-User:
-{user_message}
+{
+    "steps":[
+        {
+            "skill":"chat.reply"
+        }
+    ]
+}
 """
 
         response = ollama.chat(
+
             model=self.model,
+
             messages=[
                 {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
                     "role": "user",
-                    "content": prompt
+                    "content": user_message
                 }
-            ]
+            ],
+
+            options={
+                "temperature": 0,
+                "num_predict": 256
+            }
+
         )
 
-        text = response["message"]["content"]
+        text = response["message"]["content"].strip()
 
-        print("\n========== RAW GEMMA OUTPUT ==========\n")
+        print("\n========== RAW PLANNER OUTPUT ==========\n")
         print(text)
-        print("\n======================================\n")
+        print("\n========================================\n")
 
-        # Remove markdown code fences
-        text = text.strip()
+        # -----------------------------------------
+        # Remove Markdown
+        # -----------------------------------------
 
         if text.startswith("```json"):
             text = text.replace("```json", "", 1)
@@ -144,15 +185,22 @@ User:
         text = text.strip()
 
         try:
-            return json.loads(text)
+
+            plan = json.loads(text)
+
+            if "steps" not in plan:
+                raise ValueError("Missing steps")
+
+            return plan
 
         except Exception as e:
+
             print("Planner JSON Error:", e)
 
             return {
                 "steps": [
                     {
-                        "agent": "chat"
+                        "skill": "chat.reply"
                     }
                 ]
             }

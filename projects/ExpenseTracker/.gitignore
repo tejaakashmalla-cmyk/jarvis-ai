@@ -1,0 +1,30 @@
+# Generated files
+*.pyc
+__pycache__
+*.egg-info/
+
+# Cache and build artifacts
+build/
+dist/
+develop-eggs/
+lib/
+venv/
+coverage/
+
+# Dependency and package lockfiles
+.pip.lock
+pipenv.lock
+poetry.lock
+
+# Python file system cache
+.thumbs/
+*.swp
+
+# IDE specific files
+.idea/
+*.idea/
+.classpath
+*.iml
+.project
+.settings/
+.vscode/

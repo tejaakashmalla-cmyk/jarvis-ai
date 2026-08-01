@@ -1,0 +1,30 @@
+{
+    "language": "python",
+    "folders": [
+        "src"
+    ],
+    "files": [
+        {
+            "path": "README.md",
+            "description": "Project documentation with setup instructions and features."
+        },
+        {
+            "path": ".gitignore",
+            "description": "Git ignore rules for Python projects."
+        },
+        {
+            "path": "requirements.txt",
+            "description": "Python package dependencies required for the project."
+        },
+        {
+            "path": "src/main.py",
+            "description": "Application entry point. Starts the program and coordinates the application."
+        },
+        {
+            "path": "src/expense_tracker.py",
+            "description": "Contains the ExpenseTracker class and all expense management business logic."
+        }
+    ],
+    "install": "pip install -r requirements.txt",
+    "run": "python -m src.main"
+}

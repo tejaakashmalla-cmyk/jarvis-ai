@@ -1,4 +1,5 @@
 from skills.setup import build_registry
+from coding.agent import CodingAgent
 
 
 class TaskExecutor:
@@ -6,6 +7,12 @@ class TaskExecutor:
     def __init__(self):
 
         self.registry = build_registry()
+
+        self.coding = CodingAgent()
+
+    # -------------------------------------------------
+    # Execute Plan
+    # -------------------------------------------------
 
     def execute(self, plan):
 
@@ -15,54 +22,73 @@ class TaskExecutor:
 
         for step in steps:
 
-            skill = self._convert_to_skill(step)
+            skill = step.get("skill", "")
 
-            if skill is None:
+            # -----------------------------------------
+            # Coding Tasks
+            # -----------------------------------------
+
+            if skill == "coding.create_project":
+
+                task = {
+
+                    "language": step.get("language", "python"),
+
+                    "project_name": step.get("name", "MyProject"),
+
+                    "project_description": step.get(
+                        "query",
+                        "Create a complete software project."
+                    )
+
+                }
+
+                result = self.coding.execute(task)
+
+                results.append(result)
+
                 continue
 
-            result = self.registry.execute(
-                skill,
-                **self._build_arguments(step)
-            )
+            # -----------------------------------------
+            # Browser/Desktop Skills
+            # -----------------------------------------
 
-            results.append(result)
+            if skill:
+
+                result = self.registry.execute(
+
+                    skill,
+
+                    **self._build_arguments(step)
+
+                )
+
+                results.append(result)
 
         return results
 
-    def _convert_to_skill(self, step):
-
-        agent = step.get("agent", "")
-        website = step.get("website", "")
-        action = step.get("action", "")
-
-        if agent == "browser":
-
-            if website == "youtube" and action == "play":
-                return "browser.youtube.play"
-
-            if website == "google" and action == "search":
-                return "browser.google.search"
-
-        elif agent == "desktop":
-
-            return "desktop.open"
-
-        return None
+    # -------------------------------------------------
+    # Build Arguments
+    # -------------------------------------------------
 
     def _build_arguments(self, step):
 
-        agent = step.get("agent", "")
+        skill = step.get("skill", "")
 
-        if agent == "browser":
+        if skill.startswith("browser"):
 
             return {
+
                 "query": step.get("query", "")
+
             }
 
-        elif agent == "desktop":
+        if skill == "desktop.open":
 
             return {
+
                 "action": step.get("action", "")
+
             }
 
         return {}

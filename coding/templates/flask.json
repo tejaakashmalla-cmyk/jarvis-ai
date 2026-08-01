@@ -1,0 +1,42 @@
+{
+    "language": "flask",
+    "folders": [
+        "app",
+        "app/routes",
+        "app/models",
+        "app/templates",
+        "app/static"
+    ],
+    "files": [
+        {
+            "path": "README.md",
+            "description": "Project documentation."
+        },
+        {
+            "path": ".gitignore",
+            "description": "Git ignore rules."
+        },
+        {
+            "path": "requirements.txt",
+            "description": "Python dependencies."
+        },
+        {
+            "path": "app.py",
+            "description": "Main Flask application entry point."
+        },
+        {
+            "path": "app/__init__.py",
+            "description": "Initialize Flask application."
+        },
+        {
+            "path": "app/routes/routes.py",
+            "description": "Application routes."
+        },
+        {
+            "path": "app/models/models.py",
+            "description": "Database models."
+        }
+    ],
+    "install": "pip install -r requirements.txt",
+    "run": "python app.py"
+}

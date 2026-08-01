@@ -1,0 +1,31 @@
+{
+    "language": "react",
+    "folders": [
+        "src",
+        "public"
+    ],
+    "files": [
+        {
+            "path": "README.md",
+            "description": "React project documentation."
+        },
+        {
+            "path": "package.json",
+            "description": "Node package configuration."
+        },
+        {
+            "path": "public/index.html",
+            "description": "HTML entry page."
+        },
+        {
+            "path": "src/main.jsx",
+            "description": "React application entry point."
+        },
+        {
+            "path": "src/App.jsx",
+            "description": "Main React application component."
+        }
+    ],
+    "install": "npm install",
+    "run": "npm run dev"
+}

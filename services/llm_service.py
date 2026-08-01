@@ -1,10 +1,12 @@
 import ollama
+from config.models import CHAT_MODEL
 
 
 class LLMService:
 
-    def __init__(self, model="gemma3:4b"):
-        self.model = model
+    def __init__(self, model=None):
+
+        self.model = model if model else CHAT_MODEL
 
     def stream_chat(self, messages):
 
@@ -13,27 +15,33 @@ class LLMService:
             messages=messages,
             stream=True,
             options={
-                "temperature": 0.7,
-                "num_predict": 150,
-                "num_ctx": 4096,
-                "num_thread": 8
+                # Lower temperature = faster & more stable
+                "temperature": 0.4,
+
+                # Larger context for future memory
+                "num_ctx": 8192,
+
+                # Let the model generate naturally
+                "num_predict": -1,
+
+                # Utilize CPU efficiently alongside GPU
+                "num_thread": 8,
+
+                # Keep model loaded in VRAM
+                "keep_alive": "30m"
             }
         )
 
         for chunk in stream:
 
-            if "message" in chunk:
+            if "message" not in chunk:
+                continue
 
-                token = chunk["message"]["content"]
+            token = chunk["message"].get("content", "")
 
-                if token:
-                    yield token
+            if token:
+                yield token
 
     def chat(self, messages):
 
-        full_response = ""
-
-        for token in self.stream_chat(messages):
-            full_response += token
-
-        return full_response
+        return "".join(self.stream_chat(messages))
